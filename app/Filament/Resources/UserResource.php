@@ -25,6 +25,7 @@ use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\RelationManagers;
 use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -51,23 +52,36 @@ class UserResource extends Resource
                         ->required()
                         ->maxLength(255),
                     
-                    Grid::make(2)
-                        ->schema([
-                            TextInput::make('password')
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('password')
                                 ->label('Password')
                                 ->password()
-                                ->required(fn($livewire) => $livewire instanceof Pages\CreateUser)
-                                ->dehydrateStateUsing(fn($state) => !empty($state) ? bcrypt($state) : null)
+                                ->dehydrateStateUsing(function ($state) {
+                                    return !empty($state) ? bcrypt($state) : null;
+                                })
                                 ->maxLength(255)
-                                ->same('password_confirmation'),
-                            
-                            TextInput::make('password_confirmation')
-                                ->label('Confirm Password')
-                                ->password()
-                                ->required(fn($livewire) => $livewire instanceof Pages\CreateUser)
-                                ->maxLength(255)
-                                ->dehydrated(false),
-                        ]),
+                                ->same('password_confirmation')
+                                ->required(),
+                                
+                                
+                                TextInput::make('password_confirmation')
+                                    ->label('Confirm Password')
+                                    ->password()
+                                    ->required(fn($livewire) => $livewire instanceof Pages\CreateUser)
+                                    ->maxLength(255)
+                                    ->dehydrated(false),
+                            ]),
+                    
+                     Select::make('role')
+                        ->relationship('roles', 'name')
+                        ->multiple()
+                        ->preload()   
+                        ->createOptionForm([
+                            TextInput::make('name')
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                        ])
                     
                 ]),
             ]);
@@ -98,6 +112,8 @@ class UserResource extends Resource
                 //
             ])
             ->actions([
+                Action::make('show')
+                    ->url(fn(User $record)=> 'users/show/'.$record->id ),
                 Tables\Actions\EditAction::make(),
                 Action::make('download')
                     ->url(fn(User $user) => route('download.pdf', $user) )
@@ -123,6 +139,7 @@ class UserResource extends Resource
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
+            'show' => Pages\ShowUser::route('/show/{id}'),
         ];
     }
 }
