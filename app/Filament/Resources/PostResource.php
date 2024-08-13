@@ -61,8 +61,11 @@ class PostResource extends Resource
                             ->required(),
                         TextInput::make('title')
                             ->live()
+                            ->required()
                             ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', Str::slug($state))),
-                        TextInput::make('slug')->required(),
+                        TextInput::make('slug')
+                                ->unique()
+                                ->required(),
                         RichEditor::make('content')
                             ->required(),
                         Toggle::make('status'),
@@ -114,6 +117,7 @@ class PostResource extends Resource
             'index' => Pages\ListPosts::route('/'),
             'create' => Pages\CreatePost::route('/create'),
             'edit' => Pages\EditPost::route('/{record}/edit'),
+            'show' => Pages\ShowPost::route('/show/{slug}'),
         ];
     }
 

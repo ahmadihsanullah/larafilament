@@ -6,8 +6,11 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
+use Filament\Pages\Dashboard;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Colors\Color;
+use Illuminate\Support\Facades\Auth;
+use App\Filament\Resources\UserResource;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -19,9 +22,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\PostResource\Widgets\StatsOverview;
-use App\Filament\Resources\UserResource;
-use Filament\Pages\Dashboard;
-use Illuminate\Support\Facades\Auth;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -65,6 +65,7 @@ class AdminPanelProvider extends PanelProvider
                         ->label('Settings')
                         ->url(fn (): string => UserResource::getUrl())
                         ->icon('heroicon-o-cog-6-tooth')
-            ]);
+            ])
+            ->databaseNotifications();
     }
 }
